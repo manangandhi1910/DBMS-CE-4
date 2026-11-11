@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="TimeTable_Project1.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1792"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="departments" custom_title="0" dock_id="1" table="4,11:maindepartments"/><dock_state state="000000ff00000000fd00000001000000020000043c000002b6fc0100000001fb000000160064006f0063006b00420072006f007700730065003101000000000000043c0000011800ffffff000002580000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="departments" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="91"/><column index="2" value="179"/><column index="3" value="156"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="session_allocations" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="80"/><column index="2" value="57"/><column index="3" value="117"/><column index="4" value="96"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="sqlite_sequence" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="156"/><column index="2" value="29"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="timetable_entries" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="55"/><column index="2" value="93"/><column index="3" value="156"/><column index="4" value="96"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">-- ==========================================
+-- PROJECT: UNIVERSITY TIMETABLE MANAGEMENT
+-- ==========================================
+
+-- Enable Foreign Key Constraints
+PRAGMA foreign_keys = ON;
+
+-- 1. DEPARTMENTS TABLE
+CREATE TABLE IF NOT EXISTS departments (
+    department_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    department_name TEXT NOT NULL UNIQUE,
+    contact_email TEXT NOT NULL
+);
+
+-- 2. TIMETABLE ENTRIES TABLE
+CREATE TABLE IF NOT EXISTS timetable_entries (
+    entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    department_id INTEGER NOT NULL,
+    course_name TEXT NOT NULL,
+    scheduled_date TEXT NOT NULL,
+
+    FOREIGN KEY (department_id)
+    REFERENCES departments(department_id)
+    ON DELETE CASCADE
+);
+
+-- 3. SESSION ALLOCATIONS TABLE
+CREATE TABLE IF NOT EXISTS session_allocations (
+    allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entry_id INTEGER NOT NULL,
+    session_type TEXT NOT NULL,
+    allocated_value REAL NOT NULL CHECK (allocated_value &gt;= 0),
+
+    FOREIGN KEY (entry_id)
+    REFERENCES timetable_entries(entry_id)
+    ON DELETE CASCADE
+);</sql><sql name="SQL 2*">-- INSERT SAMPLE DEPARTMENTS
+
+INSERT INTO departments
+(department_name, contact_email)
+VALUES
+('Computer Science', 'cs@university.edu'),
+('Mechanical Engineering', 'mech@university.edu'),
+('Electronics', 'ece@university.edu'),
+('Mathematics', 'math@university.edu'),
+('Data Science', 'ds@university.edu');
+
+
+-- INSERT TIMETABLE ENTRIES
+
+INSERT INTO timetable_entries
+(department_id, course_name, scheduled_date)
+VALUES
+(1, 'Data Structures', '2026-11-05'),
+(1, 'Database Management', '2026-11-06'),
+(2, 'Thermodynamics', '2026-11-07'),
+(3, 'Digital Electronics', '2026-11-08'),
+(4, 'Linear Algebra', '2026-11-09'),
+(5, 'Statistics', '2026-11-10');
+
+
+-- INSERT SESSION ALLOCATIONS
+
+INSERT INTO session_allocations
+(entry_id, session_type, allocated_value)
+VALUES
+(1, 'Lecture Hours', 3),
+(1, 'Lab Hours', 2),
+(2, 'Lecture Hours', 3),
+(2, 'Tutorial Hours', 1),
+(3, 'Lecture Hours', 4),
+(3, 'Lab Hours', 2),
+(4, 'Lecture Hours', 3),
+(5, 'Tutorial Hours', 2),
+(6, 'Lecture Hours', 3),
+(6, 'Lab Hours', 2);
+
+</sql><sql name="SQL 3">SELECT
+    te.entry_id,
+    d.department_name,
+    te.course_name,
+    te.scheduled_date,
+    sa.session_type,
+    sa.allocated_value
+FROM departments d
+INNER JOIN timetable_entries te
+    ON d.department_id = te.department_id
+INNER JOIN session_allocations sa
+    ON te.entry_id = sa.entry_id
+ORDER BY te.entry_id;</sql><sql name="SQL 4">
+BEGIN TRANSACTION;
+
+DELETE FROM departments
+WHERE department_id = 1;
+
+-- Check timetable entries
+SELECT * FROM timetable_entries;
+
+-- Check session allocations
+SELECT * FROM session_allocations;
+
+ROLLBACK;</sql><current_tab id="3"/></tab_sql></sqlb_project>
